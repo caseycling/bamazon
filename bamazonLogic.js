@@ -15,12 +15,22 @@ var connection = mysql.createConnection({
     // Your password
     password: "$3ndNudes",
     database: "bamazon_db"
-  });
+});
   
-  connection.connect(function(err) {
+connection.connect(function(err) {
     if (err) {
       throw err;
     }
     console.log("connected as id " + connection.threadId);
-    connection.end();
-  });
+    afterConnection();
+});
+
+function afterConnection() {
+    connection.query("SELECT * FROM products", function(err, res) {
+        if (err) throw err;
+        console.log(res);
+        connection.end();
+    });
+}
+
+
