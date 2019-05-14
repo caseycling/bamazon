@@ -55,14 +55,28 @@ function purchaseItem() {
         connection.query("SELECT * FROM products", function(err, res) {
             if(err)  
             throw err;
-            var quantity = answer.quantity;
+            var quantityRequest = answer.quantity;
             var chosenItem;
+
+            //Loop through the results from MySQL and compare them with the productId answer given in inquirer
             for (var i = 0; i < res.length; i++) {
+              //If any item_id matches the productId, set chosenItem equal to that product
               if (res[i].item_id === parseInt(answer.productId)) {
                 chosenItem = res[i];
                 console.log(chosenItem)
+                console.log(quantityRequest)
               }
             }
+            
+            //If the customer requests more of the item than we have left, alert them of how much of the product is remaining
+            if (chosenItem.stock_quantity < quantityRequest) {
+              console.log("Sorry, we only have " + chosenItem.stock_quantity + " left of that product")
+            } else {
+
+            }
+
+
+
         })
     connection.end();
    }) 
