@@ -31,7 +31,6 @@ function afterConnection() {
         if (err) throw err;
         console.log(res);
         purchaseItem();
-        connection.end();
     });
 }
 
@@ -39,21 +38,39 @@ function afterConnection() {
 function purchaseItem() {
     inquirer
       .prompt([
-        {
+          {
             name: "productId",
             type: "input",
-            message: "What is the id of the production you would like to purchase?",
-        },
-        {
+            message: "What is the id of the product you would like to purchase?"
+          },
+          {
             name: "quantity",
             type: "input",
-            message: "Please enter the amount you would like to purchase"
-        }
-    ])
+            message: "How many would you like to purchase"
+          }
+        ])
+    //Take the productId answer and use it to query the database under id
+    //If it is not found, alert the user to enter a valid id
     .then(function(answer) {
-        console.log(answer.productId)
-        console.log(answer.quantity)
-    })
+        connection.query("SELECT * FROM products", function(err, res) {
+            if(err)  
+            throw err;
+            var quantity = answer.quantity;
+            var chosenItem;
+            for (var i = 0; i < res.length; i++) {
+              if (res[i].item_id === parseInt(answer.productId)) {
+                chosenItem = res[i];
+                console.log(chosenItem)
+              }
+            }
+        })
+    connection.end();
+   }) 
 }
 
-
+//Ask user how much of the specified product they wish to purchase
+//Query bamazon database
+//If the user enters too many, tell them how many are left and ask them to choose a lesser amount
+//Otherwise, subtract the amount from the number remaining
+//Update the database with correct amounts of inventory
+//Tell the user the total cost of their purchase
