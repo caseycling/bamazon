@@ -23,10 +23,10 @@ connection.connect(function(err) {
       throw err;
     }
     console.log("connected as id " + connection.threadId);
-    afterConnection();
+    itemDisplay();
 });
 //Function which logs all the information from the products table in the MySQL database
-function afterConnection() {
+function itemDisplay() {
     connection.query("SELECT * FROM products", function(err, res) {
         if (err) throw err;
         //Obligatory welcome message
@@ -39,7 +39,7 @@ function afterConnection() {
           console.log("Department: " + res[i].department_name);
           console.log("Price: $" + res[i].price);
           console.log("Product ID: " + res[i].item_id);
-          // console.log(res[i].stock_quantity);
+          console.log("Quantity: " + res[i].stock_quantity);
         }
         
         purchaseItem();
@@ -69,24 +69,24 @@ function purchaseItem() {
             throw err;
             //Save the amount of the product requested to a variable
             var quantityRequest = answer.quantity;
-            var chosenItem;
+            var selectedItem;
 
             //Loop through the results from MySQL and compare them with the productId answer given in inquirer
             for (var i = 0; i < res.length; i++) {
               //If any item_id matches the productId, set chosenItem equal to that product
               if (res[i].item_id === parseInt(answer.productId)) {
-                chosenItem = res[i];
-                console.log(chosenItem)
+                selectedItem = res[i];
+                console.log(selectedItem)
                 console.log(quantityRequest)
               }
             }
             
             //If the customer requests more of the item than we have left, alert them of how much of the product is remaining
-            if (chosenItem.stock_quantity < quantityRequest) {
-              console.log("Sorry, we only have " + chosenItem.stock_quantity + " left of that product")
+            if (selectedItem.stock_quantity < quantityRequest) {
+              console.log("Sorry, we only have " + selectedItem.stock_quantity + " left of that product")
             } else {
               //Save new stock quantity to a variable
-              var newQuantity = (chosenItem.stock_quantity - quantityRequest)
+              var newQuantity = (selectedItem.stock_quantity - quantityRequest)
               //Otherwise, update the database by subtracting the customers request from the stock_quantity
               connection.query("UPDATE products SET ? WHERE ?", 
               [
@@ -96,12 +96,12 @@ function purchaseItem() {
                 },
                 //Where the item_id is the chosenItem.
                 {
-                  item_id: chosenItem.productId
+                  item_id: selectedItem.productId
                 }
               ])
               //Alert the customer of their total
-              console.log("Thank you for your purchase! Your total is $" + (quantityRequest * chosenItem.price))
-              console.log(chosenItem.stock_quantity)
+              console.log("Thank you for your purchase! Your total is $" + (quantityRequest * selectedItem.price))
+              console.log(selectedItem.stock_quantity)
               console.log(newQuantity)
               purchaseMore();
               // connection.end() CORRECT PLACEMENT
@@ -117,6 +117,7 @@ function endConnection() {
   connection.end();
 }
 
+//Ask the user if they would like to make another purchase
 function purchaseMore() {
   inquirer.prompt({
     name: "purchaseMore",
@@ -124,9 +125,12 @@ function purchaseMore() {
     message: "Would you like to make another purchase?"
   })
   .then(function(answer) {
-    if (answer.confirm == true) {
-      purchaseItem();
-    } else {
+    //If yes, then call the purchaseItem function again
+    console.log()
+    if (answer.purchaseMore === true) {
+      itemDisplay();
+    //Otherwise, call the endConnection function
+    } else if (answer.purchaseMore === false) {
       endConnection();
     }
   })
