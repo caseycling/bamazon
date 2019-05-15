@@ -44,25 +44,27 @@ function itemDisplay() {
       }
     }
 
-    purchaseItem();
+    selectItem();
   });
 }
 
+//variable to save selected item
+var selectedItem;
+
 //Prompt which asks user which id of the item they'd like to buy and the quantity
-function purchaseItem() {
-  inquirer
-    .prompt([
-      {
-        name: "productId",
-        type: "input",
-        message: "What is the id of the product you would like to purchase?"
-      },
-      {
-        name: "quantity",
-        type: "input",
-        message: "How many would you like to purchase"
-      }
-    ])
+function selectItem() {
+  inquirer.prompt([
+    {
+      name: "productId",
+      type: "input",
+      message: "What is the id of the product you would like to purchase?"
+    }
+    // {
+    //   name: "quantity",
+    //   type: "input",
+    //   message: "How many would you like to purchase"
+    // }
+  ])
     //Take the productId answer and use it to query the database under id
     //If it is not found, alert the user to enter a valid id
     .then(function (answer) {
@@ -70,48 +72,59 @@ function purchaseItem() {
         if (err)
           throw err;
         //Save the amount of the product requested to a variable
-        var quantityRequest = answer.quantity;
-        var selectedItem;
+        // var quantityRequest = answer.quantity;
+        // var selectedItem;
 
         //Loop through the results from MySQL and compare them with the productId answer given in inquirer
         for (var i = 0; i < res.length; i++) {
           //If any item_id matches the productId, set chosenItem equal to that product
           if (res[i].item_id === parseInt(answer.productId)) {
             selectedItem = res[i];
-            console.log(selectedItem)
-            console.log(quantityRequest)
           }
         }
+      }
+    )}
+  )}
 
-        //If the customer requests more of the item than we have left, alert them of how much of the product is remaining
-        if (selectedItem.stock_quantity < quantityRequest) {
-          console.log("Sorry, we only have " + selectedItem.stock_quantity + " left of that product")
-        } else {
-          //Save new stock quantity to a variable
-          var newQuantity = (selectedItem.stock_quantity - quantityRequest)
-          //Otherwise, update the database by subtracting the customers request from the stock_quantity
-          connection.query("UPDATE products SET ? WHERE ?",
-            [
-              //Set stock_quantity equal to the newQuantity
-              {
-                stock_quantity: newQuantity
-              },
-              //Where the item_id is the chosenItem.
-              {
-                item_id: selectedItem.productId
-              }
-            ])
-          //Alert the customer of their total
-          console.log("Thank you for your purchase! Your total is $" + (quantityRequest * selectedItem.price))
-          console.log(selectedItem.stock_quantity)
-          console.log(newQuantity)
-          purchaseMore();
-          // connection.end() CORRECT PLACEMENT
+function selectQuantity() {
+  inquirer.prompt([
+    {
+      name: "quantity",
+      type: "input",
+      message: "How many would you like to purchase"
+    }
+  ])
+
+  //If the customer requests more of the item than we have left, alert them of how much of the product is remaining
+  if (selectedItem.stock_quantity < quantityRequest) {
+    console.log("Sorry, we only have " + selectedItem.stock_quantity + " left of that product")
+  } else {
+    //Save new stock quantity to a variable
+    var newQuantity = (selectedItem.stock_quantity - quantityRequest)
+    //Otherwise, update the database by subtracting the customers request from the stock_quantity
+    connection.query("UPDATE products SET ? WHERE ?",
+      [
+        //Set stock_quantity equal to the newQuantity
+        {
+          stock_quantity: newQuantity
+        },
+        //Where the item_id is the chosenItem.
+        {
+          item_id: selectedItem.productId
         }
-      })
+      ])
+    //Alert the customer of their total
+    console.log("Thank you for your purchase! Your total is $" + (quantityRequest * selectedItem.price))
+    console.log(selectedItem.stock_quantity)
+    console.log(newQuantity)
+    purchaseMore();
+    // connection.end() CORRECT PLACEMENT
+  }
+})
       // connection.end();
     })
   //  connection.end();
+}
 }
 
 function endConnection() {
