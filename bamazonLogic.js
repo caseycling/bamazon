@@ -23,8 +23,10 @@ connection.connect(function (err) {
     throw err;
   }
   console.log("connected as id " + connection.threadId);
+
   itemDisplay();
 });
+
 //Function which logs all the information from the products table in the MySQL database
 function itemDisplay() {
   connection.query("SELECT * FROM products", function (err, res) {
@@ -53,27 +55,17 @@ var selectedItem;
 
 //Prompt which asks user which id of the item they'd like to buy and the quantity
 function selectItem() {
-  inquirer.prompt([
-    {
-      name: "productId",
-      type: "input",
-      message: "What is the id of the product you would like to purchase?"
-    }
-    // {
-    //   name: "quantity",
-    //   type: "input",
-    //   message: "How many would you like to purchase"
-    // }
-  ])
+  inquirer.prompt({
+    name: "productId",
+    type: "input",
+    message: "What is the id of the product you would like to purchase?"
+  })
     //Take the productId answer and use it to query the database under id
     //If it is not found, alert the user to enter a valid id
     .then(function (answer) {
       connection.query("SELECT * FROM products", function (err, res) {
         if (err)
           throw err;
-        //Save the amount of the product requested to a variable
-        // var quantityRequest = answer.quantity;
-        // var selectedItem;
 
         //Loop through the results from MySQL and compare them with the productId answer given in inquirer
         for (var i = 0; i < res.length; i++) {
@@ -81,73 +73,68 @@ function selectItem() {
           if (res[i].item_id === parseInt(answer.productId)) {
             selectedItem = res[i];
           }
-        }
+        } selectQuantity();
       }
-    )}
-  )}
+      )
+    })
+}
 
 function selectQuantity() {
-  inquirer.prompt([
-    {
-      name: "quantity",
-      type: "input",
-      message: "How many would you like to purchase"
-    }
-  ])
-
-  //If the customer requests more of the item than we have left, alert them of how much of the product is remaining
-  if (selectedItem.stock_quantity < quantityRequest) {
-    console.log("Sorry, we only have " + selectedItem.stock_quantity + " left of that product")
-  } else {
-    //Save new stock quantity to a variable
-    var newQuantity = (selectedItem.stock_quantity - quantityRequest)
-    //Otherwise, update the database by subtracting the customers request from the stock_quantity
-    connection.query("UPDATE products SET ? WHERE ?",
-      [
-        //Set stock_quantity equal to the newQuantity
-        {
-          stock_quantity: newQuantity
-        },
-        //Where the item_id is the chosenItem.
-        {
-          item_id: selectedItem.productId
-        }
-      ])
-    //Alert the customer of their total
-    console.log("Thank you for your purchase! Your total is $" + (quantityRequest * selectedItem.price))
-    console.log(selectedItem.stock_quantity)
-    console.log(newQuantity)
-    purchaseMore();
-    // connection.end() CORRECT PLACEMENT
-  }
-})
-      // connection.end();
-    })
-  //  connection.end();
-}
-}
-
-function endConnection() {
-  console.log("Thank you for choosing Bamazon!")
-  connection.end();
-}
-
-//Ask the user if they would like to make another purchase
-function purchaseMore() {
   inquirer.prompt({
-    name: "purchaseMore",
-    type: "confirm",
-    message: "Would you like to make another purchase?"
+    name: "quantity",
+    type: "input",
+    message: "How many would you like to purchase"
   })
     .then(function (answer) {
-      //If yes, then call the purchaseItem function again
-      console.log()
-      if (answer.purchaseMore === true) {
-        itemDisplay();
-        //Otherwise, call the endConnection function
-      } else if (answer.purchaseMore === false) {
-        endConnection();
+      //If the customer requests more of the item than we have left, alert them of how much of the product is remaining
+      if (selectedItem.stock_quantity < answer.quantity) {
+        console.log("Sorry, we only have " + selectedItem.stock_quantity + " left of that product")
+      } else {
+        //Save new stock quantity to a variable
+        var newQuantity = (selectedItem.stock_quantity - answer.quantity)
+        //Otherwise, update the database by subtracting the customers request from the stock_quantity
+        connection.query("UPDATE products SET ? WHERE ?",
+          [
+            //Set stock_quantity equal to the newQuantity
+            {
+              stock_quantity: newQuantity
+            },
+            //Where the item_id is the chosenItem.
+            {
+              item_id: selectedItem.productId
+            }
+          ])
+        //Alert the customer of their total
+        console.log("Thank you for your purchase! Your total is $" + (answer.quantity * selectedItem.price))
+        console.log(selectedItem.stock_quantity)
+        console.log(newQuantity)
+        purchaseMore();
       }
-    })
+    }
+  )
 }
 
+
+  function endConnection() {
+    console.log("Thank you for choosing Bamazon!")
+    connection.end();
+  }
+
+  //Ask the user if they would like to make another purchase
+  function purchaseMore() {
+    inquirer.prompt({
+      name: "purchaseMore",
+      type: "confirm",
+      message: "Would you like to make another purchase?"
+    })
+      .then(function (answer) {
+        //If yes, then call the purchaseItem function again
+        console.log()
+        if (answer.purchaseMore === true) {
+          itemDisplay();
+          //Otherwise, call the endConnection function
+        } else if (answer.purchaseMore === false) {
+          endConnection();
+        }
+      })
+  }
