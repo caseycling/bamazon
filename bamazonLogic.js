@@ -67,6 +67,7 @@ function purchaseItem() {
         connection.query("SELECT * FROM products", function(err, res) {
             if(err)  
             throw err;
+            //Save the amount of the product requested to a variable
             var quantityRequest = answer.quantity;
             var chosenItem;
 
@@ -84,23 +85,50 @@ function purchaseItem() {
             if (chosenItem.stock_quantity < quantityRequest) {
               console.log("Sorry, we only have " + chosenItem.stock_quantity + " left of that product")
             } else {
+              //Save new stock quantity to a variable
+              var newQuantity = (chosenItem.stock_quantity - quantityRequest)
               //Otherwise, update the database by subtracting the customers request from the stock_quantity
-              // "UPDATE products SET ?", 
-              // [
-              //   chosenItem.stock_quantity: (chosenItem.stock_quantity - quantityRequest)
-              // ]
+              connection.query("UPDATE products SET ? WHERE ?", 
+              [
+                //Set stock_quantity equal to the newQuantity
+                {
+                  stock_quantity: newQuantity
+                },
+                //Where the item_id is the chosenItem.
+                {
+                  item_id: chosenItem.productId
+                }
+              ])
+              //Alert the customer of their total
+              console.log("Thank you for your purchase! Your total is $" + (quantityRequest * chosenItem.price))
+              console.log(chosenItem.stock_quantity)
+              console.log(newQuantity)
+              purchaseMore();
+              // connection.end() CORRECT PLACEMENT
             } 
-
-
-
         })
-    connection.end();
+    // connection.end();
    }) 
+  //  connection.end();
 }
 
-//Ask user how much of the specified product they wish to purchase
-//Query bamazon database
-//If the user enters too many, tell them how many are left and ask them to choose a lesser amount
-//Otherwise, subtract the amount from the number remaining
-//Update the database with correct amounts of inventory
-//Tell the user the total cost of their purchase
+function endConnection() {
+  console.log("Thank you for choosing Bamazon!")
+  connection.end();
+}
+
+function purchaseMore() {
+  inquirer.prompt({
+    name: "purchaseMore",
+    type: "confirm",
+    message: "Would you like to make another purchase?"
+  })
+  .then(function(answer) {
+    if (answer.confirm == true) {
+      purchaseItem();
+    } else {
+      endConnection();
+    }
+  })
+}
+
