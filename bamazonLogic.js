@@ -73,9 +73,14 @@ function selectItem() {
           if (res[i].item_id === parseInt(answer.productId)) {
             selectedItem = res[i];
           }
-        } selectQuantity();
-      }
-      )
+        }
+        if (selectItem = null) {
+          console.log("Item not found. Please enter a valid ID")
+        } else {
+          console.log(selectItem)
+          selectQuantity();
+        }
+      })
     })
 }
 
@@ -89,6 +94,7 @@ function selectQuantity() {
       //If the customer requests more of the item than we have left, alert them of how much of the product is remaining
       if (selectedItem.stock_quantity < answer.quantity) {
         console.log("Sorry, we only have " + selectedItem.stock_quantity + " left of that product")
+        selectQuantity();
       } else {
         //Save new stock quantity to a variable
         var newQuantity = (selectedItem.stock_quantity - answer.quantity)
@@ -111,30 +117,29 @@ function selectQuantity() {
         purchaseMore();
       }
     }
-  )
+    )
 }
 
+function endConnection() {
+  console.log("Thank you for choosing Bamazon!")
+  connection.end();
+}
 
-  function endConnection() {
-    console.log("Thank you for choosing Bamazon!")
-    connection.end();
-  }
-
-  //Ask the user if they would like to make another purchase
-  function purchaseMore() {
-    inquirer.prompt({
-      name: "purchaseMore",
-      type: "confirm",
-      message: "Would you like to make another purchase?"
+//Ask the user if they would like to make another purchase
+function purchaseMore() {
+  inquirer.prompt({
+    name: "purchaseMore",
+    type: "confirm",
+    message: "Would you like to make another purchase?"
+  })
+    .then(function (answer) {
+      //If yes, then call the purchaseItem function again
+      console.log()
+      if (answer.purchaseMore === true) {
+        itemDisplay();
+        //Otherwise, call the endConnection function
+      } else if (answer.purchaseMore === false) {
+        endConnection();
+      }
     })
-      .then(function (answer) {
-        //If yes, then call the purchaseItem function again
-        console.log()
-        if (answer.purchaseMore === true) {
-          itemDisplay();
-          //Otherwise, call the endConnection function
-        } else if (answer.purchaseMore === false) {
-          endConnection();
-        }
-      })
-  }
+}
