@@ -74,10 +74,12 @@ function selectItem() {
             selectedItem = res[i];
           }
         }
+
         // if (selectedItem = null) {
         //   console.log("Item not found. Please enter a valid ID")
         // } else {
         //   console.log(selectedItem)
+        //   selectQuantity();
         // }
         selectQuantity();
       })
@@ -122,11 +124,6 @@ function selectQuantity() {
     )
 }
 
-function endConnection() {
-  console.log("Thank you for choosing Bamazon!")
-  connection.end();
-}
-
 //Ask the user if they would like to make another purchase
 function purchaseMore() {
   inquirer.prompt({
@@ -144,4 +141,10 @@ function purchaseMore() {
         endConnection();
       }
     })
+}
+
+//Function ends connection 
+function endConnection() {
+  console.log("Thank you for choosing Bamazon!")
+  connection.end();
 }
