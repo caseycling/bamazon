@@ -56,7 +56,26 @@ function managerOptions() {
     })
 }
 
-
+//Function which logs all the information from the products table in the MySQL database
+function displayInventory() {
+    connection.query("SELECT * FROM products", function (err, res) {
+      if (err) throw err;
+      //Obligatory welcome message
+      console.log("-------------------------------------------------------")
+      console.log("Here you are, m'lord")
+      //Loop through each item in the products table
+      for (var i = 0; i < res.length; i++) {
+        console.log("-------------------------------------------------------")
+        console.log("Product name: " + res[i].product_name);
+        console.log("Department: " + res[i].department_name);
+        console.log("Price: $" + res[i].price);
+        console.log("Product ID: " + res[i].item_id);
+        if (res[i].stock_quantity < 10) {
+          console.log("Less than 10 remaining!")
+        }
+      }
+    })
+}
 
 
 function endConnection() {
