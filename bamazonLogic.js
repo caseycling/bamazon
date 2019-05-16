@@ -66,6 +66,8 @@ function selectItem() {
       connection.query("SELECT * FROM products", function (err, res) {
         if (err)
           throw err;
+          // console.log("Please enter a valid Id")
+          // selectItem();
 
         //Loop through the results from MySQL and compare them with the productId answer given in inquirer
         for (var i = 0; i < res.length; i++) {
@@ -81,11 +83,13 @@ function selectItem() {
         //   console.log(selectedItem)
         //   selectQuantity();
         // }
+
         selectQuantity();
       })
     })
 }
 
+//Function that verifies customer quantity
 function selectQuantity() {
   inquirer.prompt({
     name: "quantity",
@@ -97,31 +101,48 @@ function selectQuantity() {
       if (selectedItem.stock_quantity < answer.quantity) {
         console.log("Sorry, we only have " + selectedItem.stock_quantity + " left of that product")
         selectQuantity();
-      } else {
-        //Save new stock quantity to a variable
-        var newQuantity = (selectedItem.stock_quantity - answer.quantity)
-        //Otherwise, update the database by subtracting the customers request from the stock_quantity
-        connection.query("UPDATE products SET ? WHERE ?",
-          [
-            //Set stock_quantity equal to the newQuantity
-            {
-              stock_quantity: newQuantity
-            },
-            //Where the item_id is the chosenItem.
-            {
-              item_id: selectedItem.item_id
-            }
-          ])
-        //Alert the customer of their total
-        console.log("Thank you for your purchase! Your total is $" + (answer.quantity * selectedItem.price))
-        
-        console.log(selectedItem.item_id)
-        console.log(selectedItem.stock_quantity)
-        console.log(newQuantity)
+
+      //If customer chooses none, fire purchase more function
+      } else if (parseInt(answer.quantity) === 0) {
+        console.log("No worries. It's okay to change your mind")
         purchaseMore();
+
+      } else {
+        //Confirm the customer would like to make the purchase
+        inquirer.prompt({
+          name: "verify",
+          type: "confirm",
+          message: "Your total comes to $" + (answer.quantity * selectedItem.price) + ". Would you like to make this purchase?"
+        })
+
+          //If they answer yes, thank them and call the purchaseMore function
+          .then(function (answer) {
+            if (answer.verify === true) {
+
+              //Save new stock quantity to a variable
+              var newQuantity = (selectedItem.stock_quantity - answer.quantity)
+              //Otherwise, update the database by subtracting the customers request from the stock_quantity
+              connection.query("UPDATE products SET ? WHERE ?",
+                [
+                  //Set stock_quantity equal to the newQuantity
+                  {
+                    stock_quantity: newQuantity
+                  },
+                  //Where the item_id is the chosenItem.
+                  {
+                    item_id: selectedItem.item_id
+                  }
+                ])
+              console.log("Thank you for shopping!")
+              purchaseMore();
+              //Otherwise, redirect them to the selectQuantity function
+            } else {
+              console.log("Okay, let's try this again")
+              selectQuantity();
+            }
+          })
       }
-    }
-    )
+    })
 }
 
 //Ask the user if they would like to make another purchase
@@ -145,6 +166,6 @@ function purchaseMore() {
 
 //Function ends connection 
 function endConnection() {
-  console.log("Thank you for choosing Bamazon!")
+  console.log("Thank you for choosing Bamazon!") 
   connection.end();
 }
