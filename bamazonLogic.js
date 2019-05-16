@@ -74,12 +74,12 @@ function selectItem() {
             selectedItem = res[i];
           }
         }
-        if (selectItem = null) {
-          console.log("Item not found. Please enter a valid ID")
-        } else {
-          console.log(selectItem)
-          selectQuantity();
-        }
+        // if (selectedItem = null) {
+        //   console.log("Item not found. Please enter a valid ID")
+        // } else {
+        //   console.log(selectedItem)
+        // }
+        selectQuantity();
       })
     })
 }
@@ -107,11 +107,13 @@ function selectQuantity() {
             },
             //Where the item_id is the chosenItem.
             {
-              item_id: selectedItem.productId
+              item_id: selectedItem.item_id
             }
           ])
         //Alert the customer of their total
         console.log("Thank you for your purchase! Your total is $" + (answer.quantity * selectedItem.price))
+        
+        console.log(selectedItem.item_id)
         console.log(selectedItem.stock_quantity)
         console.log(newQuantity)
         purchaseMore();
