@@ -81,20 +81,28 @@ function displayLowInventory() {
         //Obligatory welcome message
         console.log("-------------------------------------------------------")
         console.log("Here you are, m'lord")
+
         //Loop through each item in the products table
         for (var i = 0; i < res.length; i++) {
-            if (res[i].stock_quantity < 5) {
+            //If a product has less than five, display the relative info
+             if (res[i].stock_quantity < 5) {
                 console.log("-------------------------------------------------------")
                 console.log("Product name: " + res[i].product_name);
                 console.log("Department: " + res[i].department_name);
                 console.log("Price: $" + res[i].price);
                 console.log("Product ID: " + res[i].item_id);
                 console.log("Quantity: " + res[i].stock_quantity)
-            } else {
-                console.log("-------------------------------------------------------")
-                console.log(res[i].product_name + "has plenty in stock")
             }
         }
+
+        //If all the items have above five, tell the user that everything is well stocked
+        if(!res.stock_quantity < 5) {
+            console.log("Everything is well stocked!")
+            //Otherwise, display just the ones that are properly stocked
+        }  else {
+            console.log("-------------------------------------------------------")
+            console.log(res[i].product_name + "has plenty in stock")
+        } 
     })
 }
 

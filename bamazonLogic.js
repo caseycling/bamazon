@@ -92,8 +92,12 @@ function selectQuantity() {
     message: "How many would you like to purchase"
   })
     .then(function (answer) {
+      
       //Set customer total
       customerTotal = (answer.quantity * selectedItem.price);
+      //Set new quantity
+      var newQuantity = (selectedItem.stock_quantity - answer.quantity)
+
       //If the customer requests more of the item than we have left, alert them of how much of the product is remaining
       if (selectedItem.stock_quantity < answer.quantity) {
         console.log("Sorry, we only have " + selectedItem.stock_quantity + " left of that product")
@@ -116,8 +120,6 @@ function selectQuantity() {
           .then(function (answer) {
             if (answer.verify === true) {
 
-              //Save new stock quantity to a variable
-              var newQuantity = (selectedItem.stock_quantity - answer.quantity)
               //Otherwise, update the database by subtracting the customers request from the stock_quantity
               connection.query("UPDATE products SET ? WHERE ?",
                 [
