@@ -76,18 +76,13 @@ function selectItem() {
             selectedItem = res[i];
           }
         }
-
-        // if (selectedItem = null) {
-        //   console.log("Item not found. Please enter a valid ID")
-        // } else {
-        //   console.log(selectedItem)
-        //   selectQuantity();
-        // }
-
         selectQuantity();
       })
     })
 }
+
+//Varible to save customer total in global scope
+var customerTotal = 0;
 
 //Function that verifies customer quantity
 function selectQuantity() {
@@ -97,6 +92,8 @@ function selectQuantity() {
     message: "How many would you like to purchase"
   })
     .then(function (answer) {
+      //Set customer total
+      customerTotal = (answer.quantity * selectedItem.price);
       //If the customer requests more of the item than we have left, alert them of how much of the product is remaining
       if (selectedItem.stock_quantity < answer.quantity) {
         console.log("Sorry, we only have " + selectedItem.stock_quantity + " left of that product")
@@ -112,7 +109,7 @@ function selectQuantity() {
         inquirer.prompt({
           name: "verify",
           type: "confirm",
-          message: "Your total comes to $" + (answer.quantity * selectedItem.price) + ". Would you like to make this purchase?"
+          message: "Your total comes to $" + (customerTotal) + ". Would you like to make this purchase?"
         })
 
           //If they answer yes, thank them and call the purchaseMore function
