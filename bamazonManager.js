@@ -92,7 +92,7 @@ function displayLowInventory() {
                 console.log("Quantity: " + res[i].stock_quantity)
             } else {
                 console.log("-------------------------------------------------------")
-                console.log(res[i] + "has plenty in stock")
+                console.log(res[i].product_name + "has plenty in stock")
             }
         }
     })
