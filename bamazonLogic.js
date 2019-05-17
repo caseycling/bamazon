@@ -66,8 +66,8 @@ function selectItem() {
       connection.query("SELECT * FROM products", function (err, res) {
         if (err)
           throw err;
-          // console.log("Please enter a valid Id")
-          // selectItem();
+        //Reset selected item to null
+        selectedItem = null;
 
         //Loop through the results from MySQL and compare them with the productId answer given in inquirer
         for (var i = 0; i < res.length; i++) {
@@ -76,7 +76,13 @@ function selectItem() {
             selectedItem = res[i];
           }
         }
-        selectQuantity();
+        //Conditional which checks for a valid ID
+        if (selectedItem === null) {
+          console.log("Sorry, please select a valid ID")
+          selectItem();
+        } else {
+          selectQuantity();
+        }
       })
     })
 }
@@ -92,7 +98,7 @@ function selectQuantity() {
     message: "How many would you like to purchase"
   })
     .then(function (answer) {
-      
+
       //Set customer total
       customerTotal = (answer.quantity * selectedItem.price);
       //Set new quantity
@@ -103,7 +109,7 @@ function selectQuantity() {
         console.log("Sorry, we only have " + selectedItem.stock_quantity + " left of that product")
         selectQuantity();
 
-      //If customer chooses none, fire purchase more function
+        //If customer chooses none, fire purchase more function
       } else if (parseInt(answer.quantity) === 0) {
         console.log("No worries. It's okay to change your mind")
         purchaseMore();
@@ -123,11 +129,9 @@ function selectQuantity() {
               //Otherwise, update the database by subtracting the customers request from the stock_quantity
               connection.query("UPDATE products SET ? WHERE ?",
                 [
-                  //Set stock_quantity equal to the newQuantity
                   {
                     stock_quantity: newQuantity
                   },
-                  //Where the item_id is the chosenItem.
                   {
                     item_id: selectedItem.item_id
                   }
@@ -155,6 +159,7 @@ function purchaseMore() {
       //If yes, then call the purchaseItem function again
       console.log()
       if (answer.purchaseMore === true) {
+        10
         itemDisplay();
         //Otherwise, call the endConnection function
       } else if (answer.purchaseMore === false) {
@@ -165,6 +170,6 @@ function purchaseMore() {
 
 //Function ends connection 
 function endConnection() {
-  console.log("Thank you for choosing Bamazon!") 
+  console.log("Thank you for choosing Bamazon!")
   connection.end();
 }
