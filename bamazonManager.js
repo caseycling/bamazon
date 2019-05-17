@@ -106,7 +106,12 @@ function displayLowInventory() {
     })
 }
 
+//Check if the user wants to run another request
+function anotherRequest() {
+    console.log
+}
+//Ends connection
+function endConnection() {
+    connection.end();
+    }
 
-        function endConnection() {
-            connection.end();
-        }
